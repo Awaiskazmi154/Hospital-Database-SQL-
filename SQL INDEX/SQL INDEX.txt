@@ -1,0 +1,6 @@
+CREATE UNIQUE INDEX  IX_StaffMember_Name
+ON StaffMember_info (member_name)
+
+
+SELECT member_name FROM StaffMember_info
+WHERE member_name LIKE 'o%';

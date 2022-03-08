@@ -1,0 +1,268 @@
+CREATE TABLE Patient_info (
+    p_id int NOT NULL UNIQUE,
+    p_name varchar(255) NOT NULL,
+    p_address varchar(255),
+    doc_id int,
+    CONSTRAINT PK_Patient_info PRIMARY KEY (p_id)
+);
+
+CREATE TABLE Doctor (
+    doc_id int NOT NULL UNIQUE,
+    doc_name varchar(255) NOT NULL,
+    doc_speciality varchar(255) NOT NULL,
+	doc_department varchar(255),
+    CONSTRAINT PK_Doctor PRIMARY KEY (doc_id)
+);
+
+CREATE TABLE Appointment (
+    apt_id int NOT NULL UNIQUE,
+    apt_description varchar(255) NOT NULL,
+    apt_date_time datetime NOT NULL,
+	doc_id int NOT NULL,
+	p_id int NOT NULL,
+    CONSTRAINT PK_Appointment PRIMARY KEY (apt_id)
+);
+
+CREATE TABLE Patient_disease (
+    p_id int NOT NULL UNIQUE,
+    p_disease varchar(255) NOT NULL,
+    CONSTRAINT PK_Patient_disease PRIMARY KEY (p_id)
+);
+
+CREATE TABLE Patient_age (
+    p_id int NOT NULL UNIQUE,
+    p_age int NOT NULL,
+    CONSTRAINT PK_Patient_age PRIMARY KEY (p_id)
+);
+
+CREATE TABLE Patient_gender (
+    p_id int NOT NULL UNIQUE,
+    p_gender varchar(255) NOT NULL,
+    CONSTRAINT PK_Patient_gender PRIMARY KEY (p_id)
+);
+
+CREATE TABLE Patient_ward (
+    ward_id int NOT NULL UNIQUE,
+    p_admit_date date NOT NULL,
+	p_discharge_date date ,
+    CONSTRAINT PK_Patient_ward PRIMARY KEY (ward_id)
+);
+
+CREATE TABLE Patient_stats (
+    p_id int NOT NULL,
+    p_status varchar(255) NOT NULL,
+	ward_id int NOT NULL,
+    CONSTRAINT PK_Patient_stats PRIMARY KEY (p_id)
+);
+
+CREATE TABLE Patient_p_phone (
+    p_phone int NOT NULL UNIQUE,
+	p_id int NOT NULL,
+    CONSTRAINT PK_Patient_p_phone PRIMARY KEY (p_phone)
+);
+
+CREATE TABLE Ward (
+    ward_id int NOT NULL UNIQUE,
+	ward_machines_available int ,
+	ward_total_members int NOT NULL,
+	ward_type varchar(255) NOT NULL,
+	ward_beds_available int ,
+    CONSTRAINT PK_Ward PRIMARY KEY (ward_id)
+);
+
+CREATE TABLE StaffMember_info (
+    member_id int NOT NULL UNIQUE,
+	member_name varchar(255) NOT NULL,
+	member_address varchar(255),
+	dept_id int,
+	Manages_member_id int NOT NULL,
+    CONSTRAINT PK_StaffMember_info PRIMARY KEY (member_id)
+);
+
+CREATE TABLE StaffMember_ranking(
+    member_id int NOT NULL UNIQUE,
+	member_experience varchar(255) NOT NULL,
+    CONSTRAINT PK_StaffMember_ranking PRIMARY KEY (member_id)
+);
+
+CREATE TABLE Member_exp(
+    member_experience varchar(255) NOT NULL,
+	member_salary int NOT NULL,
+	member_designation varchar(255),
+	member_working_shifts varchar(255),
+    CONSTRAINT PK_Member_exp PRIMARY KEY (member_experience)
+);
+
+CREATE TABLE Department(
+    dept_id int NOT NULL UNIQUE,
+	dept_name varchar(255) NOT NULL,
+	dept_employees int NOT NULL,
+	dept_head varchar(255) NOT NULL,
+	dept_location varchar(255),
+    CONSTRAINT PK_Department PRIMARY KEY (dept_id)
+);
+
+CREATE TABLE Bill(
+    bill_id int NOT NULL UNIQUE,
+	p_id int NOT NULL,
+    bill_total_payment int NOT NULL,
+    CONSTRAINT PK_Bill PRIMARY KEY (bill_id)
+);
+
+CREATE TABLE Bill_total(
+    bill_total_payment int NOT NULL,
+	bill_doctor_charge int NOT NULL,
+	bill_nursing_charge int,
+	bill_ward_charge int,
+	bill_lab_charge int,
+	bill_operation_charge int,
+    CONSTRAINT PK_Bill_total PRIMARY KEY (bill_total_payment)
+);
+
+CREATE TABLE Bill_advance(
+    bill_id int NOT NULL UNIQUE,
+	bill_advance_payment int NOT NULL,
+    CONSTRAINT PK_Bill_advance PRIMARY KEY (bill_id)
+);
+
+CREATE TABLE Lab(
+    lab_id int NOT NULL UNIQUE,
+	lab_name varchar(255) NOT NULL,
+	lab_timings varchar(255) NOT NULL,
+	lab_tests_taken int ,
+	lab_attendent varchar(255) NOT NULL,
+    doc_id int,
+    CONSTRAINT PK_Lab PRIMARY KEY (lab_id)
+);
+
+CREATE TABLE Nurse(
+    ward_id int NOT NULL,
+    p_id int NOT NULL,
+    member_id int NOT NULL
+);
+
+CREATE TABLE Receptionist(
+    apt_id int NOT NULL,
+    member_id int NOT NULL
+);
+
+
+CREATE TABLE Take_tests(
+    p_id int NOT NULL,
+    lab_id int NOT NULL
+);
+
+
+CREATE TABLE Is_A(
+    doc_id int NOT NULL UNIUQE,
+    member_id int NOT NULL UNIQUE
+);
+
+---------------------------------------------------------------------
+
+ALTER TABLE Patient_info
+ADD CONSTRAINT FK_PatientDoctor
+FOREIGN KEY (doc_id) REFERENCES Doctor(doc_id);
+
+ALTER TABLE Patient_info
+ADD CONSTRAINT df_p_name
+DEFAULT 'Patient' For p_name;
+
+ALTER TABLE Doctor
+ADD CONSTRAINT df_doc_name
+DEFAULT 'Doctor' For doc_name;
+
+ALTER TABLE Patient_gender
+ADD CONSTRAINT df_p_gender
+DEFAULT 'N/A' For p_gender;
+
+ALTER TABLE Appointment
+ADD CONSTRAINT FK_AppointmentDoctor
+FOREIGN KEY (doc_id) REFERENCES Doctor(doc_id)
+;
+ALTER TABLE Appointment
+ADD CONSTRAINT FK_AppointmentPatient
+FOREIGN KEY (p_id) REFERENCES Patient_info(p_id)
+;
+ALTER TABLE Patient_stats
+ADD CONSTRAINT FK_Patient_ward FOREIGN KEY (ward_id) REFERENCES Patient_ward(ward_id)
+;
+ALTER TABLE Patient_stats
+ADD CONSTRAINT FK_Patient_Oward FOREIGN KEY (ward_id) REFERENCES Ward(ward_id)
+;
+
+
+ALTER TABLE StaffMember_info
+ADD CONSTRAINT FK_StaffMember_dept FOREIGN KEY (dept_id) REFERENCES Department(dept_id)
+;
+ALTER TABLE StaffMember_info
+ADD CONSTRAINT FK_StaffMember_manages FOREIGN KEY (Manages_member_id) REFERENCES StaffMember_info(member_id)
+;
+
+ALTER TABLE StaffMember_ranking
+ADD CONSTRAINT FK_StaffMember_exp FOREIGN KEY (member_experience) REFERENCES Member_exp(member_experience)
+;
+ALTER TABLE Bill
+ADD CONSTRAINT FK_Bill_patient FOREIGN KEY (p_id) REFERENCES Patient_info(p_id)
+;
+ALTER TABLE Bill
+ADD CONSTRAINT FK_Bill_total FOREIGN KEY (bill_total_payment) REFERENCES Bill_total(bill_total_payment)
+;
+
+ALTER TABLE Lab
+ADD CONSTRAINT FK_Lab_reportDoc FOREIGN KEY (doc_id) REFERENCES Doctor(doc_id)
+;
+
+ALTER TABLE Patient_age
+ADD CHECK (p_age>0);
+
+ALTER TABLE Bill
+ADD CHECK (bill_total_payment>0);
+
+ALTER TABLE Bill_advance
+ADD CHECK (bill_advance_payment>0);
+
+ALTER TABLE Nurse
+ADD CONSTRAINT FK_Nurse_ward 
+FOREIGN KEY (ward_id) 
+REFERENCES Ward(ward_id);
+
+ALTER TABLE Nurse
+ADD CONSTRAINT FK_Nurse_patient 
+FOREIGN KEY (p_id) 
+REFERENCES Patient_info(p_id);
+
+ALTER TABLE Nurse
+ADD CONSTRAINT FK_Nurse_id 
+FOREIGN KEY (member_id) 
+REFERENCES StaffMember_info(member_id);
+
+ALTER TABLE Receptionist
+ADD CONSTRAINT FK_Receptionist_apt
+FOREIGN KEY (apt_id) 
+REFERENCES Appointment(apt_id);
+
+ALTER TABLE Receptionist
+ADD CONSTRAINT FK_Receptionist_id 
+FOREIGN KEY (member_id) 
+REFERENCES StaffMember_info(member_id);
+
+ALTER TABLE Take_tests
+ADD CONSTRAINT FK_Take_tests_patient 
+FOREIGN KEY (p_id) 
+REFERENCES Patient_info(p_id);
+
+ALTER TABLE Take_tests
+ADD CONSTRAINT FK_Take_tests_lab 
+FOREIGN KEY (lab_id) 
+REFERENCES Lab(lab_id);
+
+ALTER TABLE Is_A
+ADD CONSTRAINT FK_Is_A_doc 
+FOREIGN KEY (doc_id) 
+REFERENCES Doctor(doc_id);
+
+ALTER TABLE Is_A
+ADD CONSTRAINT FK_Is_A_member 
+FOREIGN KEY (member_id) 
+REFERENCES StaffMember_info(member_id);

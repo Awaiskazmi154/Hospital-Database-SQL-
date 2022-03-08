@@ -1,0 +1,43 @@
+
+SELECT A.p_name,A.p_address,B.doc_name, C.ward_type,D.p_age,E.p_disease
+FROM Patient_info A, Doctor B, Ward C, Patient_age D, Patient_disease E, Patient_stats F
+WHERE A.p_id = F.p_id and F.ward_id = C.ward_id and C.ward_type = 'Normal Ward' and A.doc_id = B.doc_id and A.p_id = D.p_id and A.p_id = E.p_id
+
+SELECT DISTINCT A.doc_id,B.doc_name
+FROM Patient_info A, Doctor B
+WHERE A.doc_id = B.doc_id
+ORDER BY B.doc_name ASC
+
+SELECT sum(A.bill_ward_charge) as 'Total Wards Charged', 
+sum(A.bill_operation_charge) as 'Total Operations Charged', 
+sum(A.bill_doctor_charge) as 'Total Doctors Charged', 
+sum(A.bill_nursing_charge) as 'Total Nurses Charged'
+FROM Bill_total A 
+
+
+SELECT A.member_name, B.member_designation, B.member_salary AS 'salary' 
+FROM StaffMember_info A, Member_exp B, StaffMember_ranking C
+WHERE B.member_salary = (SELECT MAX(member_salary) FROM Member_exp)
+AND B.member_experience = C.member_experience AND A.member_id = C.member_id
+UNION
+SELECT A.member_name, B.member_designation, B.member_salary AS 'salary' 
+FROM StaffMember_info A, Member_exp B, StaffMember_ranking C
+WHERE B.member_salary = (SELECT MIN(member_salary) FROM Member_exp)
+AND B.member_experience = C.member_experience AND A.member_id = C.member_id
+
+
+SELECT A.dept_name, B.member_name, C.member_working_shifts, C.member_salary 
+FROM Department A, StaffMember_info B, Member_exp C, StaffMember_ranking D
+WHERE A.dept_name = 'EMG Dept'
+AND A.dept_id = B.dept_id AND B.member_id = D.member_id  AND C.member_experience = D.member_experience
+UNION
+SELECT A.dept_name, B.member_name, C.member_working_shifts, C.member_salary 
+FROM Department A, StaffMember_info B, Member_exp C, StaffMember_ranking D
+WHERE A.dept_name = 'ENT'
+AND A.dept_id = B.dept_id AND B.member_id = D.member_id  AND C.member_experience = D.member_experience
+
+
+SELECT sum(A.member_salary) AS 'Total Salaries For Employees',B.dept_name
+FROM Member_exp A, Department B, StaffMember_info C, StaffMember_ranking D 
+WHERE B.dept_id = C.dept_id AND C.member_id = D.member_id  AND D.member_experience = A.member_experience
+GROUP BY B.dept_name
